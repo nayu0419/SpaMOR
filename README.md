@@ -8,6 +8,8 @@ SpaMOR first utilizes Graph Convolutional Networks (GCN) to obtain low-dimension
 
 The workflow of SpaMOR is shown in the following diagram.  
 
+![image](./spamor.png)
+
 # Installation  
 SpaGRA is implemented using Python 3.7.12 and Pytorch 1.11.0.  
 
@@ -29,4 +31,102 @@ The mouse thymus dataset and human Lymph Node dataset are obtained from https://
 The SPOTS mouse spleen dataset is available at GEO with accession code GSE198353.   
 The human tonsil dataset can be accessed at https://doi.org/10.6084/m9.figshare.21623148.v5.   
 The MISAR-seq mouse brain dataset is accessible at the National Genomics Data Center with accession number OEP003285.  
-The spatial ATAC-RNA-seq mouse brain dataset can be found at https://web.atlasxomics.com/visualization/Fan/.
+The spatial ATAC-RNA-seq mouse brain dataset can be found at https://web.atlasxomics.com/visualization/Fan/.  
+
+# Tutorial  
+Here, we present two examples to illustrate the application of SpaMOR for spatial domain identification.   
+
+## Mouse thymus Stereo-CITE-seq dataset  
+
+```python
+import matplotlib.pyplot as plt
+from sklearn.metrics.cluster import adjusted_rand_score
+from SpaMOR.utils import *
+from SpaMOR.process import *
+from SpaMOR import train_model
+from datetime import datetime
+import anndata
+
+adata1=anndata.read("Data/Mouse_Thymus/adata_ADT.h5ad")
+adata2=anndata.read("Data/Mouse_Thymus/adata_RNA.h5ad")
+
+prefilter_genes(adata1, min_cells=3)  
+sc.pp.normalize_per_cell(adata1)
+sc.pp.log1p(adata1)
+
+prefilter_genes(adata2, min_cells=3)  
+sc.pp.highly_variable_genes(adata2, flavor="seurat_v3", n_top_genes=3000)
+sc.pp.normalize_per_cell(adata2)
+sc.pp.log1p(adata2)
+
+
+adj = calculate_adj_matrix(adata1,"x","y")
+adatalist = [adata1,adata2]
+sequencing = ["ADT","RNA"]
+
+adata1, adata2= train_model.train(adatalist,adj,sequencing, k=10,n_epochs=50,h=[3000,3000],device='cpu')
+
+
+sc.pl.spatial(adata1, spot_size=100,color='SpaMOR',save="SpaMOR")
+sc.pp.neighbors(adata1, use_rep='emb_pca')
+sc.tl.umap(adata1)
+plt.rcParams["figure.figsize"] = (3, 3)
+sc.pl.umap(adata1, color="SpaMOR", title='SpaMOR',save="SpaMOR_umap")
+```
+## MISAR-seq mouse brain dataset    
+```python
+import matplotlib.pyplot as plt
+from sklearn.metrics.cluster import adjusted_rand_score
+from SpaMOR.utils import *
+from SpaMOR.process import *
+from SpaMOR import train_model
+from datetime import datetime
+import anndata
+
+adata1=anndata.read("Data/Mouse_embryonic_brain/E15/E15_adata_atac.h5ad")
+adata2=anndata.read("Data/Mouse_embryonic_brain/E15/E15_adata_rna.h5ad")
+
+adata1.obs['Y'] = adata1.obs['Combined_Clusters_annotation'].astype(str)
+adata2.obs['Y'] = adata1.obs['Combined_Clusters_annotation'].astype(str)
+
+spatial_coords = np.column_stack((adata1.obs["array_col"], adata1.obs["array_row"]))
+adata1.obsm['spatial'] = spatial_coords
+adata2.obsm['spatial'] = spatial_coords
+
+coor = pd.DataFrame(adata1.obsm['spatial'])
+coor.index = adata1.obs.index
+coor.columns = ['imagerow', 'imagecol']
+adata1.obs["y_pixel"]=coor['imagerow']
+adata1.obs["x_pixel"]=coor['imagecol']
+
+
+adata1.X = adata1.X.astype(float)
+prefilter_genes(adata1, min_cells=3) 
+sc.pp.highly_variable_genes(adata1, flavor="seurat_v3", n_top_genes=8000)
+sc.pp.normalize_per_cell(adata1)
+sc.pp.log1p(adata1)
+
+
+prefilter_genes(adata2, min_cells=3)  
+sc.pp.normalize_per_cell(adata2)
+sc.pp.log1p(adata2)
+sc.pp.highly_variable_genes(adata2, flavor="seurat_v3", n_top_genes=3000)
+
+
+adj = calculate_adj_matrix(adata1,"array_col","array_row")
+adatalist = [adata1,adata2]
+sequencing = ["ATAC","RNA"]
+
+adata1, adata2= train_model.train(adatalist,adj,sequencing, k=14,n_epochs=20,h=[3000,3000],l=0.5,device='cpu')
+
+obs_df = adata1.obs.dropna()
+ARI0 = adjusted_rand_score(obs_df['SpaMOR'], obs_df['Y'])
+print('Adjusted rand index = %.2f' % ARI0)
+
+sc.pl.spatial(adata1, spot_size=1,color='SpaMOR',title='SpaMOR {}'.format(ARI0),save="E_SpaMOR")
+sc.pp.neighbors(adata1, use_rep='emb_pca')
+sc.tl.umap(adata1)
+plt.rcParams["figure.figsize"] = (3, 4)
+sc.pl.umap(adata1, color="SpaMOR", title='SpaMOR',save="E_SpaMOR_umap")
+
+```
