@@ -22,16 +22,33 @@ scanpy==1.9.1
 scikit-learn==1.0.2  
 scipy==1.7.3  
 anndata==0.8.0  
-matplotlib==3.5.2  
+matplotlib==3.5.2    
+
+## Install SpaMOR  
+```python
+git clone https://github.com/sunxue-yy/SpaMOR.git
+
+cd SpaMOR
+
+python setup.py build
+
+python setup.py install --user
+```
+
 
 # Datasets    
 All datasets used in this study are publicly available. Users can download them from the links below.
 
-The mouse thymus dataset and human Lymph Node dataset are obtained from https://zenodo.org/records/10362607.   
-The SPOTS mouse spleen dataset is available at GEO with accession code GSE198353.   
-The human tonsil dataset can be accessed at https://doi.org/10.6084/m9.figshare.21623148.v5.   
-The MISAR-seq mouse brain dataset is accessible at the National Genomics Data Center with accession number OEP003285.  
-The spatial ATAC-RNA-seq mouse brain dataset can be found at https://web.atlasxomics.com/visualization/Fan/.  
+  The mouse thymus dataset and human Lymph Node dataset are obtained from https://zenodo.org/records/10362607.   
+
+  The SPOTS mouse spleen dataset is available at GEO with accession code GSE198353.   
+
+  The human tonsil dataset can be accessed at https://doi.org/10.6084/m9.figshare.21623148.v5.   
+
+  The MISAR-seq mouse brain dataset is accessible at the National Genomics Data Center with accession number OEP003285.  
+
+  The spatial ATAC-RNA-seq mouse brain dataset can be found at https://web.atlasxomics.com/visualization/Fan/.  
+
 
 # Tutorial  
 Here, we present two examples to illustrate the application of SpaMOR for spatial domain identification.   
