@@ -1,17 +1,17 @@
-# SpaMOR  
-## SpaMOR: Integrating spatial multi-omics representation for spatial domain identification 
+# soFusion  
+## soFusion: facilitating tissue compartmentalization via spatial multi-omics data fusion 
 
 # Introduction  
-To effectively integrate information from different omics for spatial domain identification, we propose a novel spatial multi-omics representation learning method, SpaMOR, which can be applied to the integration of any two omics.   
+To effectively integrate information from different omics for spatial domain identification, we propose a novel spatial multi-omics representation learning method, soFusion, which can be applied to the integration of any two omics.   
 
-SpaMOR first utilizes Graph Convolutional Networks (GCN) to obtain low-dimensional embeddings of two spatial omics data. To generate the cross-omics joint representation that can fully retain both the commonality and specificity information of different omics, SpaMOR introduces an intra-omics and inter-omics joint feature learning strategy. Furthermore, to better capture the distribution patterns of different omics data, SpaMOR designs three specific decoders, which model the count features of transcriptomics, epigenomics, and proteomics data using zero-inflated negative binomial (ZINB) distribution, Bernoulli distribution, and a mixture of two negative binomial distributions, respectively. For the needs of other omics, SpaMOR also designs a universal decoder based on the fully connected network. Finally, SpaMOR uses the multi-omics representation, which fully integrates spatial multi-omics information, to identify spatial domains.  
+soFusion first utilizes Graph Convolutional Networks (GCN) to obtain low-dimensional embeddings of two spatial omics data. To generate the cross-omics joint representation that can fully retain both the commonality and specificity information of different omics, soFusion introduces an intra-omics and inter-omics joint feature learning strategy. Furthermore, to better capture the distribution patterns of different omics data, soFusion designs three specific decoders, which model the count features of transcriptomics, epigenomics, and proteomics data using zero-inflated negative binomial (ZINB) distribution, Bernoulli distribution, and a mixture of two negative binomial distributions, respectively. For the needs of other omics, soFusion also designs a universal decoder based on the fully connected network. Finally, soFusion uses the multi-omics representation, which fully integrates spatial multi-omics information, to identify spatial domains.  
 
-The workflow of SpaMOR is shown in the following diagram.  
+The workflow of soFusion is shown in the following diagram.  
 
-![image](./spamor.png)
+![image](./soFusion.png)
 
 # Installation  
-SpaGRA is implemented using Python 3.7.12 and Pytorch 1.11.0.  
+soFusion is implemented using Python 3.7.12 and Pytorch 1.11.0.  
 
 ## Requirements  
 numpy==1.21.5  
@@ -24,11 +24,11 @@ scipy==1.7.3
 anndata==0.8.0  
 matplotlib==3.5.2    
 
-## Install SpaMOR  
+## Install soFusion  
 ```python
-git clone https://github.com/sunxue-yy/SpaMOR.git
+git clone https://github.com/sunxue-yy/soFusion.git
 
-cd SpaMOR
+cd soFusion
 
 python setup.py build
 
@@ -51,16 +51,16 @@ All datasets used in this study are publicly available. Users can download them 
 
 
 # Tutorial  
-Here, we present two examples to illustrate the application of SpaMOR for spatial domain identification.   
+Here, we present two examples to illustrate the application of soFusion for spatial domain identification.   
 
 ## Mouse thymus Stereo-CITE-seq dataset  
 
 ```python
 import matplotlib.pyplot as plt
 from sklearn.metrics.cluster import adjusted_rand_score
-from SpaMOR.utils import *
-from SpaMOR.process import *
-from SpaMOR import train_model
+from soFusion.utils import *
+from soFusion.process import *
+from soFusion import train_model
 from datetime import datetime
 import anndata
 
@@ -84,19 +84,19 @@ sequencing = ["ADT","RNA"]
 adata1, adata2= train_model.train(adatalist,adj,sequencing, k=10,n_epochs=50,h=[3000,3000],device='cpu')
 
 
-sc.pl.spatial(adata1, spot_size=100,color='SpaMOR',save="SpaMOR")
+sc.pl.spatial(adata1, spot_size=100,color='soFusion',save="soFusion")
 sc.pp.neighbors(adata1, use_rep='emb_pca')
 sc.tl.umap(adata1)
 plt.rcParams["figure.figsize"] = (3, 3)
-sc.pl.umap(adata1, color="SpaMOR", title='SpaMOR',save="SpaMOR_umap")
+sc.pl.umap(adata1, color="soFusion", title='soFusion',save="soFusion_umap")
 ```
 ## MISAR-seq mouse brain dataset    
 ```python
 import matplotlib.pyplot as plt
 from sklearn.metrics.cluster import adjusted_rand_score
-from SpaMOR.utils import *
-from SpaMOR.process import *
-from SpaMOR import train_model
+from soFusion.utils import *
+from soFusion.process import *
+from soFusion import train_model
 from datetime import datetime
 import anndata
 
@@ -137,13 +137,13 @@ sequencing = ["ATAC","RNA"]
 adata1, adata2= train_model.train(adatalist,adj,sequencing, k=14,n_epochs=20,h=[3000,3000],l=0.5,device='cpu')
 
 obs_df = adata1.obs.dropna()
-ARI0 = adjusted_rand_score(obs_df['SpaMOR'], obs_df['Y'])
+ARI0 = adjusted_rand_score(obs_df['soFusion'], obs_df['Y'])
 print('Adjusted rand index = %.2f' % ARI0)
 
-sc.pl.spatial(adata1, spot_size=1,color='SpaMOR',title='SpaMOR {}'.format(ARI0),save="E_SpaMOR")
+sc.pl.spatial(adata1, spot_size=1,color='soFusion',title='soFusion {}'.format(ARI0),save="E_soFusion")
 sc.pp.neighbors(adata1, use_rep='emb_pca')
 sc.tl.umap(adata1)
 plt.rcParams["figure.figsize"] = (3, 4)
-sc.pl.umap(adata1, color="SpaMOR", title='SpaMOR',save="E_SpaMOR_umap")
+sc.pl.umap(adata1, color="soFusion", title='soFusion',save="E_soFusion_umap")
 
 ```
