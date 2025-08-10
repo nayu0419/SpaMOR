@@ -86,7 +86,8 @@ adatalist = [adata1,adata2]                 # Combine datasets into a list
 sequencing = ["ADT","RNA"]                  # Specify sequencing types
 
 # Train the soFusion model
-adata1, adata2= train_model.train(adatalist,adj,sequencing, k=10,n_epochs=50,h=[3000,3000],device='cpu')
+adata1, adata2= train_model.train(adatalist,adj,sequencing, k=10,n_epochs=50,h=[3000,3000],
+                                a=1, b=1, c=1, d=1, weight=[1,1,1], device='cpu')
 
 # Visualize results
 sc.pl.spatial(adata1, spot_size=100,color='soFusion',save="soFusion")  # Plot spatial visualization
@@ -147,7 +148,8 @@ adatalist = [adata1,adata2]  # Combine datasets into a list
 sequencing = ["ATAC","RNA"]  # Specify sequencing types
 
 # Train the soFusion model
-adata1, adata2= train_model.train(adatalist,adj,sequencing, k=14,n_epochs=20,h=[3000,3000],l=0.5,device='cpu')
+adata1, adata2= train_model.train(adatalist,adj,sequencing, k=14,n_epochs=20,h=[3000,3000],
+                                    l=1, a=1, b=1, c=1, d=1, weight=[1,5,5],device='cpu')
 
 # Calculate and print Adjusted Rand Index (ARI) for clustering evaluation
 obs_df = adata1.obs.dropna()
